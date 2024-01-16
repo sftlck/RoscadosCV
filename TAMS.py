@@ -113,7 +113,7 @@ class TAMS:
         self.settings_folder = os.path.join(os.getcwd(), "Settings")
 
         ######background universal image
-        self.background = ImageTk.PhotoImage(PIL.Image.open('ISI SIM_1 30.png'))
+        self.background = ImageTk.PhotoImage(PIL.Image.open('Black_colour.jpg'))
         
         ######background measure set
         image_black_measure_label = Label(self.Measure, image = self.background, bg = 'black')

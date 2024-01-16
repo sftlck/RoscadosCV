@@ -3,8 +3,6 @@ from tkinter import *
 from tkinter import ttk
 import cv2
 
-import Main
-
 def Ex001(self): #exception in case it detects that images were not selected for img_mtd/parallel_img_mtd 
 
     def Ex001_close():
