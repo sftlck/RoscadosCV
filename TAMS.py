@@ -60,11 +60,44 @@ class TAMS:
             self.px_val = data['px_val']
 
             print(log()+'settings loaded successfully')
+################################################################################################################
+
+        if not os.path.exists(self.settings_folder):
+            print(log()+'lens data file not found...')
+            
+        else:
+
+            print(log()+'loading lens data...')
+
+            json_fields = ['lens_alias','const_x_pixel_mm','const_y_pixel_mm']
+
+            with open(self.settings_folder + '/' + 'Lenses.json', 'r',encoding='utf-8') as f:
+                data = json.load(f)
+
+            item =                  0
+            lens_alias_line =       []
+            
+            if data:
+                ##### CASTRO - 16/03/2026 - AGORA TEMOS UMA LISTA DE LENTES E DADOS
+                for i in range(len(data['lenses'])):
+                    temp_lens_alias_list = []
+                    ##### CASTRO - 16/03/2026 - CRIEI EM FORMA DE LISTA TEMPORÁRIA PARA FAZER UMA MATRIZ-COLUNA ONDE CADA ELEMENTO É UM CONJUNTO DE DADOS DE CADA LENTE
+                    ##### ASSIM, OS DADOS SELECIONADOS FICAM UNIFICADOS
+                    temp_lens_alias_list.append(data['lenses'][item][json_fields[0]])
+                    temp_lens_alias_list.append(data['lenses'][item][json_fields[1]])
+                    temp_lens_alias_list.append(data['lenses'][item][json_fields[2]])
+                    lens_alias_line.append(temp_lens_alias_list)
+                    
+                    item+=1
+            ##### CASTRO 16/03/2026 - SERIA UMA BOA IMPRIMIR NA IMAGEM FINAL O NOME DA LENTE DE AMPLIAÇÃO
+            print(log()+'lens data loaded successfully')
+            temp_lens_alias_list = []
+            #print(lens_alias_line)
 
         global text
 
         self.master = master
-        master.title("Software de Medição de Roscados v05-03-26")
+        master.title("Software de Medição de Calibradores Roscados v13-03-26")
         self.master.tkraise()
         logo = PhotoImage(file = 'logo.png')
         self.master.iconphoto(True, logo)
@@ -169,15 +202,15 @@ class TAMS:
         cLs = 0
         sLs = 0
 
-        self.image_label = Label(self.Measure, background = 'grey')
-        self.image_label.place (x = 60, y = 15)
+        self.image_label =      Label(self.Measure, background = 'grey')
+        self.image_label.place(x = 60, y = 15)
         #self.image_label.grid (row = 1, column = 1)
         self.image_label.grid_propagate(False)
 
         self.btn_strt = ttk.Button(self.Measure, text = 'Iniciar', command = lambda: (self.year_measure(), self.mtd_strt()), style = 'TButton')
         self.btn_strt.grid (row = mLs, column = 0, sticky = 'W', padx = 15, pady = 7)
         btn_exit = ttk.Button(self.Measure, text = 'Sair', command = sys.exit, style = 'TButton')
-        btn_exit.grid (row = mLs + 7, column = 0, sticky = 'W', padx = 15, pady = 8)
+        btn_exit.grid (row = mLs + 9, column = 0, sticky = 'W', padx = 15, pady = 30)
 
         #Settings Frame
         lenght_mssg = Label(self.Settings, text = "Threshold for minimum pixels gap length in true edges detection:", fg = '#FFFFFF')
@@ -248,6 +281,40 @@ class TAMS:
         self.inpt_box_OS.configure (background = 'black', width = 20)
         self.inpt_box_OS.insert(0,'') ##placehlolder, insert
         
+        ##### CASTRO 13/03/2026 - AGORA VAMOS LIDAR COM UM CAMPO DE LENTES DE AMPLIAÇÃO
+        self.inpt_box_OS_text = Label(self.Measure, text = "Lentes de Ampliação", fg = 'White', )
+        self.inpt_box_OS_text.grid (row = mLs + 7, column = 0, sticky = 'W', padx = 15)
+        self.inpt_box_OS_text.configure (background = 'black')
+        
+        ##### CASTRO 13/03/2026 - ADICIONEI O TESTE PARA O CAMPO DE LENTES
+        print(lens_alias_line)
+        options = []
+        for lens in lens_alias_line:
+            options.append(lens[0])
+
+        self.lens_box = ttk.Combobox(self.Measure,values=options)
+        
+        self.lens_box.grid (row = mLs + 8, column = 0, sticky = 'W', padx = 15)
+        self.lens_box.configure (background = 'black', width = 17)
+        
+        ##### POR ENQUANTO VOU DEIXAR COMO O PRIMEIRO ELEMENTO DE lens_alias_list, DEPOIS PRETENDO HERDAR O HISTÓRICO DE SELEÇÃO
+        self.lens_box.insert(0,options[0]) 
+
+        def on_lens_select(event):
+            selected_name = self.lens_box.get()
+            
+            for lens_data in lens_alias_line:
+                if lens_data[0] == selected_name:
+                    print(f"{log()}lens selected: {lens_data[0]}")
+                    
+                    lens_selected = lens_data[0]
+                    constx =        lens_data[1]
+                    consty =        lens_data[1]
+
+                    break
+
+        self.lens_box.bind('<<ComboboxSelected>>', on_lens_select)
+        
         def chk_img_chkbtn():
             if self.img_mtd_chk.instate(['selected']):
                 self.cam_mtd_chk.configure(state = 'disabled')
@@ -284,7 +351,7 @@ class TAMS:
         #end of Measure Frame
         #Credits Frame
 
-        self.crd_mssg = Label(self.Credits, text = "Software de Medição de Roscados, versão 16-03-2025.", fg = 'White', bg = 'black')
+        self.crd_mssg = Label(self.Credits, text = "Software de Medição de Calibradores Roscados, versão 16/03/2026.", fg = 'White', bg = 'black')
         self.crd_mssg.grid (row = cLs, column = 0, padx = 15, pady = 15, sticky = 'W')
         self.crd_mssg.configure (bg = 'black')
         self.crd_mssg2 = Label(self.Credits, text = "Xoko/Castro, 2023.", fg = 'White', bg = 'black')
